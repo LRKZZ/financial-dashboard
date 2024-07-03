@@ -58,7 +58,9 @@ async def fetch_data(figi):
                 candle.volume,
                 figi_id
             ])
+    print(data)
     return data
+
 
 def check_and_insert_data_to_db(data):
     try:
