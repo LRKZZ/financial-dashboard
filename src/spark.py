@@ -73,20 +73,16 @@ def check_and_insert_data_to_db(data):
         cur = conn.cursor()
 
         for record in data:
-            check_query = """
-            SELECT 1 FROM candles
-            WHERE time_of_candle = %s AND open_price = %s AND high_price = %s AND low_price = %s
-            AND close_price = %s AND volume = %s AND figi_id = %s;
+            insert_query = """
+            INSERT INTO candles (time_of_candle, open_price, high_price, low_price, close_price, volume, figi_id)
+            SELECT %s, %s, %s, %s, %s, %s, %s
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM candles
+                WHERE time_of_candle = %s AND figi_id = %s
+            );
             """
-            cur.execute(check_query, record)
-            exists = cur.fetchone()
-            
-            if not exists:
-                insert_query = """
-                INSERT INTO candles (time_of_candle, open_price, high_price, low_price, close_price, volume, figi_id)
-                VALUES (%s, %s, %s, %s, %s, %s, %s);
-                """
-                cur.execute(insert_query, record)
+            cur.execute(insert_query, record + [record[0], record[6]])
 
         conn.commit()
         cur.close()
