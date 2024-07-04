@@ -36,6 +36,35 @@ def get_figi_id(figi_number):
         print(f"Error fetching figi_id for {figi_number}: {e}")
         return None
 
+def get_previous_candle_data(figi_id):
+    try:
+        conn = psycopg2.connect(
+            dbname="financial_db",
+            user="postgres",
+            password=password,
+            host="localhost",
+            port="5432"
+        )
+        cur = conn.cursor()
+
+        query = """
+        SELECT open_price, high_price, low_price, close_price, volume
+        FROM candles
+        WHERE figi_id = %s
+        ORDER BY time_of_candle DESC
+        LIMIT 1;
+        """
+        cur.execute(query, (figi_id,))
+        previous_data = cur.fetchone()
+
+        cur.close()
+        conn.close()
+        return previous_data
+
+    except Exception as e:
+        print(f"Error fetching previous candle data for figi_id {figi_id}: {e}")
+        return None
+
 async def fetch_data(figi):
     data = []
     figi_id = get_figi_id(figi)
@@ -58,6 +87,14 @@ async def fetch_data(figi):
                 candle.volume,
                 figi_id
             ])
+    
+    if not data:
+        previous_data = get_previous_candle_data(figi_id)
+        if previous_data:
+            current_time = now().replace(second=0, microsecond=0, tzinfo=None)
+            previous_data = (current_time,) + previous_data + (figi_id,)
+            data.append(previous_data)
+
     print(data)
     return data
 
@@ -82,7 +119,7 @@ def check_and_insert_data_to_db(data):
                 WHERE time_of_candle = %s AND figi_id = %s
             );
             """
-            cur.execute(insert_query, record + [record[0], record[6]])
+            cur.execute(insert_query, tuple(record) + (record[0], record[6]))
 
         conn.commit()
         cur.close()
