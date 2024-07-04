@@ -33,7 +33,7 @@ def get_figi_id(figi_number):
         return figi_id
 
     except Exception as e:
-        print(f"Error fetching figi_id: {e}")
+        print(f"Error fetching figi_id for {figi_number}: {e}")
         return None
 
 async def fetch_data(figi):
@@ -60,7 +60,6 @@ async def fetch_data(figi):
             ])
     print(data)
     return data
-
 
 def check_and_insert_data_to_db(data):
     try:
