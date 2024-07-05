@@ -1,10 +1,28 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
 from tinkoff.invest import CandleInterval, AsyncClient
 from tinkoff.invest.utils import now
 import asyncio
-from config import TOKEN, figi_list
-from db import get_figi_id, get_previous_candle_data, check_and_insert_data_to_db
-from cache import cache_candle_data, get_cached_candle_data
+from config import TOKEN, figi_list, redis_client
+import json
+
+def cache_candle_data(figi, data):
+    key = f"candle_data:{figi}"
+    for item in data:
+        item['time'] = item['time'].isoformat()  # Преобразование datetime в строку
+    redis_client.set(key, json.dumps(data), ex=60)  # Кэширование данных на 60 секунд
+    print(f"Cached data for {figi}: {json.dumps(data)}")
+
+def get_cached_candle_data(figi):
+    key = f"candle_data:{figi}"
+    cached_data = redis_client.get(key)
+    if cached_data:
+        data = json.loads(cached_data)
+        for item in data:
+            item['time'] = datetime.fromisoformat(item['time'])  # Преобразование строки обратно в datetime
+        print(f"Retrieved cached data for {figi}: {data}")
+        return data
+    print(f"No cached data found for {figi}")
+    return None
 
 async def fetch_data(figi):
     # Проверка наличия данных в кэше
@@ -14,10 +32,6 @@ async def fetch_data(figi):
         return cached_data
 
     data = []
-    figi_id = get_figi_id(figi)
-    if figi_id is None:
-        print(f"figi_id not found for {figi}")
-        return data
     
     async with AsyncClient(TOKEN) as client:
         async for candle in client.get_all_candles(
@@ -25,23 +39,19 @@ async def fetch_data(figi):
             from_=now() - timedelta(minutes=1),
             interval=CandleInterval.CANDLE_INTERVAL_1_MIN,
         ):
-            data.append([
-                candle.time,
-                candle.open.units + candle.open.nano / 1e9,
-                candle.high.units + candle.high.nano / 1e9,
-                candle.low.units + candle.low.nano / 1e9,
-                candle.close.units + candle.close.nano / 1e9,
-                candle.volume,
-                figi_id
-            ])
+            data.append({
+                "time": candle.time,
+                "open": candle.open.units + candle.open.nano / 1e9,
+                "high": candle.high.units + candle.high.nano / 1e9,
+                "low": candle.low.units + candle.low.nano / 1e9,
+                "close": candle.close.units + candle.close.nano / 1e9,
+                "volume": candle.volume,
+            })
     
     if not data:
-        previous_data = get_previous_candle_data(figi_id)
-        if previous_data:
-            current_time = now().replace(second=0, microsecond=0, tzinfo=None)
-            previous_data = (current_time,) + previous_data + (figi_id,)
-            data.append(previous_data)
-
+        # Handle case where no new data is available
+        print(f"No new data for {figi}")
+    
     # Кэширование данных
     cache_candle_data(figi, data)
     
@@ -51,10 +61,5 @@ async def fetch_data(figi):
 async def stream_data():
     while True:
         tasks = [fetch_data(figi) for figi in figi_list]
-        results = await asyncio.gather(*tasks)
-        
-        for data in results:
-            if data:
-                check_and_insert_data_to_db(data)
-                
+        await asyncio.gather(*tasks)
         await asyncio.sleep(60)
