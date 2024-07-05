@@ -6,19 +6,21 @@ from tinkoff.invest import CandleInterval, AsyncClient
 from tinkoff.invest.utils import now
 from dotenv import load_dotenv
 
+
 load_dotenv()
 
-password = os.getenv("PASSWORD_SQL")
-token = os.getenv("TOKEN")
+PASSWORD = os.getenv("PASSWORD_SQL")
+TOKEN = os.getenv("TOKEN")
 
-figi_list = ["BBG004731032", "BBG004731354", "BBG004730ZJ9", "BBG004730RP0", "BBG004S681W1", "BBG004730N88", "BBG00475KKY8", "BBG004S68473", "BBG0047315D0", "BBG004S68614"]  # Добавьте здесь ваши FIGI
+with open("data/figi.txt", "r") as figi_list:
+    figi_numbers = list(map(lambda x: x.strip(), figi_list.readlines()))
 
 def get_figi_id(figi_number):
     try:
         conn = psycopg2.connect(
             dbname="financial_db",
             user="postgres",
-            password=password,
+            password=PASSWORD,
             host="localhost",
             port="5432"
         )
@@ -41,7 +43,7 @@ def get_previous_candle_data(figi_id):
         conn = psycopg2.connect(
             dbname="financial_db",
             user="postgres",
-            password=password,
+            password=PASSWORD,
             host="localhost",
             port="5432"
         )
@@ -72,7 +74,7 @@ async def fetch_data(figi):
         print(f"figi_id not found for {figi}")
         return data
     
-    async with AsyncClient(token) as client:
+    async with AsyncClient(TOKEN) as client:
         async for candle in client.get_all_candles(
             figi=figi,
             from_=now() - timedelta(minutes=1),
@@ -103,7 +105,7 @@ def check_and_insert_data_to_db(data):
         conn = psycopg2.connect(
             dbname="financial_db",
             user="postgres",
-            password=password,
+            password=PASSWORD,
             host="localhost",
             port="5432"
         )
