@@ -2,11 +2,10 @@ import os
 from dotenv import load_dotenv
 import redis
 
-
 load_dotenv()
 
-PASSWORD = "ufhybnehf"
-TOKEN = "t.4-0QUkKqbdomKc3vNLAKQ4OdihFkqEcJvSjOmUwWsEwb4Kliu1PLMPKl2eGGBo9SfMbzNMNcBQqYIC5MbA13rQ"
+token = os.getenv("TOKEN")
+password = os.getenv("PASSWORD_SQL")
 
 figi_list = [
     "BBG004731032", "BBG004731354", "BBG004730ZJ9", 
