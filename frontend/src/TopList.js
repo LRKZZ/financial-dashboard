@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import './TopList.css';
 
 const TopList = () => {
@@ -7,6 +8,7 @@ const TopList = () => {
     const [topGainers, setTopGainers] = useState([]);
     const [topLosers, setTopLosers] = useState([]);
     const [showAll, setShowAll] = useState({ volume: false, gainers: false, losers: false });
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchTopVolume = async () => {
@@ -51,13 +53,17 @@ const TopList = () => {
         return value !== undefined && value !== null ? value.toFixed(4) : '0.0000';
     };
 
+    const handleCompanyClick = (figi_id) => {
+        navigate(`/company/${figi_id}`);
+    };
+
     return (
         <div className="top-list">
             <div className="top-section">
                 <h2>Топ по обороту</h2>
                 <ul>
                     {(showAll.volume ? topVolume : topVolume.slice(0, 3)).map((item, index) => (
-                        <li key={index}>
+                        <li key={index} onClick={() => handleCompanyClick(item.figi_id)} className="company-item">
                             {item.company_name} - {item.total_volume} ₽
                         </li>
                     ))}
@@ -70,7 +76,7 @@ const TopList = () => {
                 <h2>Взлеты дня</h2>
                 <ul>
                     {(showAll.gainers ? topGainers : topGainers.slice(0, 3)).map((item, index) => (
-                        <li key={index} style={{ color: item.percentage_change > 0 ? 'green' : 'red' }}>
+                        <li key={index} style={{ color: 'green' }} onClick={() => handleCompanyClick(item.figi_id)} className="company-item">
                             {item.company_name} - {formatPercentage(item.percentage_change)}%
                         </li>
                     ))}
@@ -83,7 +89,7 @@ const TopList = () => {
                 <h2>Падения дня</h2>
                 <ul>
                     {(showAll.losers ? topLosers : topLosers.slice(0, 3)).map((item, index) => (
-                        <li key={index} style={{ color: item.percentage_change < 0 ? 'red' : 'green' }}>
+                        <li key={index} style={{ color: 'red' }} onClick={() => handleCompanyClick(item.figi_id)} className="company-item">
                             {item.company_name} - {formatPercentage(item.percentage_change)}%
                         </li>
                     ))}
