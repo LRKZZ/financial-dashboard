@@ -1,31 +1,25 @@
 import os
-from datetime import timedelta
+from datetime import timedelta, datetime
 import asyncio
 import psycopg2
 from tinkoff.invest import CandleInterval, AsyncClient
 from tinkoff.invest.utils import now
+from decimal import Decimal
 from dotenv import load_dotenv
-import redis
 
 load_dotenv()
 
-PASSWORD = os.getenv("PASSWORD_SQL")
-TOKEN = os.getenv("TOKEN")
+password = os.getenv("PASSWORD_SQL")
+token = os.getenv("TOKEN")
 
-# with open("data/figi.txt", "r") as figi_list:
-#     figi_numbers = list(map(lambda x: x.strip(), figi_list.readlines()))
-
-figi_list = ["BBG004731032", "BBG004731354", "BBG004730ZJ9", "BBG004730RP0", "BBG004S681W1", "BBG004730N88", "BBG00475KKY8", "BBG004S68473", "BBG0047315D0", "BBG004S68614"]
-
-# Настройка клиента Redis
-redis_client = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
+figi_list = ["BBG004731032", "BBG004731354", "BBG004730ZJ9", "BBG004730RP0", "BBG004S681W1", "BBG004730N88", "BBG00475KKY8", "BBG004S68473", "BBG0047315D0", "BBG004S68614"]  # Добавьте здесь ваши FIGI
 
 def get_figi_id(figi_number):
     try:
         conn = psycopg2.connect(
             dbname="financial_db",
             user="postgres",
-            password=PASSWORD,
+            password=password,
             host="localhost",
             port="5432"
         )
@@ -48,7 +42,7 @@ def get_previous_candle_data(figi_id):
         conn = psycopg2.connect(
             dbname="financial_db",
             user="postgres",
-            password=PASSWORD,
+            password=password,
             host="localhost",
             port="5432"
         )
@@ -72,37 +66,20 @@ def get_previous_candle_data(figi_id):
         print(f"Error fetching previous candle data for figi_id {figi_id}: {e}")
         return None
 
-def cache_candle_data(figi, data):
-    key = f"candle_data:{figi}"
-    redis_client.set(key, str(data), ex=60)  # Кэширование данных на 60 секунд
-
-def get_cached_candle_data(figi):
-    key = f"candle_data:{figi}"
-    cached_data = redis_client.get(key)
-    if cached_data:
-        return eval(cached_data)
-    return None
-
 async def fetch_data(figi):
-    # Проверка наличия данных в кэше
-    cached_data = get_cached_candle_data(figi)
-    if cached_data:
-        print(f"Using cached data for {figi}")
-        return cached_data
-
     data = []
     figi_id = get_figi_id(figi)
     if figi_id is None:
         print(f"figi_id not found for {figi}")
         return data
     
-    async with AsyncClient(TOKEN) as client:
+    async with AsyncClient(token) as client:
         async for candle in client.get_all_candles(
             figi=figi,
             from_=now() - timedelta(minutes=1),
             interval=CandleInterval.CANDLE_INTERVAL_1_MIN,
         ):
-            data.append([
+            data.append((
                 candle.time,
                 candle.open.units + candle.open.nano / 1e9,
                 candle.high.units + candle.high.nano / 1e9,
@@ -110,8 +87,9 @@ async def fetch_data(figi):
                 candle.close.units + candle.close.nano / 1e9,
                 candle.volume,
                 figi_id
-            ])
+            ))
     
+    # Проверка на пустые результаты и замена их на предыдущие данные
     if not data:
         previous_data = get_previous_candle_data(figi_id)
         if previous_data:
@@ -119,9 +97,6 @@ async def fetch_data(figi):
             previous_data = (current_time,) + previous_data + (figi_id,)
             data.append(previous_data)
 
-    # Кэширование данных
-    cache_candle_data(figi, data)
-    
     print(data)
     return data
 
@@ -130,7 +105,7 @@ def check_and_insert_data_to_db(data):
         conn = psycopg2.connect(
             dbname="financial_db",
             user="postgres",
-            password=PASSWORD,
+            password=password,
             host="localhost",
             port="5432"
         )
