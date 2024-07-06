@@ -5,12 +5,10 @@
 }
 
 .top-section {
-    background-color: #f8f9fa;
-    border-radius: 8px;
+    background: #f9f9f9;
     padding: 20px;
+    border-radius: 10px;
     width: 30%;
-    text-align: center;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .top-section h2 {
@@ -20,36 +18,37 @@
 .top-section ul {
     list-style: none;
     padding: 0;
-    margin: 0;
 }
 
-.top-section ul li {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
+.top-section li {
     padding: 10px;
-    background-color: #ffffff;
-    border-radius: 4px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background 0.3s;
 }
 
-.top-section ul li img {
-    width: 24px;
-    height: 24px;
-    margin-right: 10px;
+.top-section li:hover {
+    background: #e0e0e0;
 }
 
-.top-section button {
-    margin-top: 10px;
+.company-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+button {
     padding: 10px 20px;
-    background-color: #007bff;
+    margin-top: 10px;
+    background: #007bff;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    text-decoration: none;
+    transition: background 0.3s;
 }
 
-.top-section button:hover {
-    background-color: #0056b3;
+button:hover {
+    background: #0056b3;
 }
