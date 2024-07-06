@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { createChart } from 'lightweight-charts';
+import { useParams, useNavigate } from 'react-router-dom';
 import './ChartComponent.css';
 
 const companyColors = {
@@ -16,7 +17,9 @@ const companyColors = {
     10: '#795548' // АФК Система - коричневый
 };
 
-function ChartComponent({ selectedCompany, handleBack }) {
+function ChartComponent() {
+    const { figi_id } = useParams();
+    const navigate = useNavigate();
     const [data, setData] = useState([]);
     const [companyName, setCompanyName] = useState('');
     const [lastPrice, setLastPrice] = useState(null);
@@ -28,7 +31,7 @@ function ChartComponent({ selectedCompany, handleBack }) {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const result = await axios.get(`/api/candles?figi_id=${selectedCompany}`);
+                const result = await axios.get(`/api/candles?figi_id=${figi_id}`);
                 setData(result.data.candles);
                 setCompanyName(result.data.company_name);
 
@@ -91,7 +94,7 @@ function ChartComponent({ selectedCompany, handleBack }) {
         const intervalId = setInterval(fetchData, 60000); // Fetch data every minute
 
         return () => clearInterval(intervalId); // Cleanup interval on component unmount
-    }, [selectedCompany, lastPrice]);
+    }, [figi_id, lastPrice]);
 
     useEffect(() => {
         if (priceChangeClass) {
@@ -104,7 +107,7 @@ function ChartComponent({ selectedCompany, handleBack }) {
 
     return (
         <div className="chart-component">
-            <div className="header" style={{ backgroundColor: companyColors[selectedCompany] }}>
+            <div className="header" style={{ backgroundColor: companyColors[figi_id] }}>
                 <h1>{companyName}</h1>
                 <p>Сектор: Финансовый сектор</p>
             </div>
@@ -119,7 +122,7 @@ function ChartComponent({ selectedCompany, handleBack }) {
             <div className="dividends">
                 <p>Чтобы получить будущие дивиденды в размере 33,3₽ на одну акцию, нужно чтобы бумаги были в портфеле до конца 10.07.2024.</p>
             </div>
-            <button onClick={handleBack} className="back-button">Назад в главное меню</button>
+            <button onClick={() => navigate('/')} className="back-button">Назад в главное меню</button>
         </div>
     );
 }
