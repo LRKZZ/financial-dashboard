@@ -75,6 +75,7 @@ def get_top_gainers():
     ),
     price_changes AS (
         SELECT
+            dp.figi_id,
             dp.company_name,
             (last_price.close_price - first_price.close_price) / first_price.close_price * 100 AS percentage_change
         FROM
@@ -85,8 +86,9 @@ def get_top_gainers():
             candles last_price ON dp.figi_id = last_price.figi_id AND dp.last_time = last_price.time_of_candle
     )
     SELECT
+        figi_id,
         company_name,
-        ROUND(percentage_change::numeric, 4) AS percentage_change
+        percentage_change
     FROM
         price_changes
     WHERE
@@ -99,8 +101,9 @@ def get_top_gainers():
     top_gainers = []
     for row in rows:
         top_gainers.append({
-            'company_name': row[0],
-            'percentage_change': float(row[1])  # Преобразование в float
+            'figi_id': row[0],
+            'company_name': row[1],
+            'percentage_change': float(row[2])  # Преобразование в float
         })
     cur.close()
     conn.close()
@@ -128,6 +131,7 @@ def get_top_losers():
     ),
     price_changes AS (
         SELECT
+            dp.figi_id,
             dp.company_name,
             (last_price.close_price - first_price.close_price) / first_price.close_price * 100 AS percentage_change
         FROM
@@ -138,6 +142,7 @@ def get_top_losers():
             candles last_price ON dp.figi_id = last_price.figi_id AND dp.last_time = last_price.time_of_candle
     )
     SELECT
+        figi_id,
         company_name,
         percentage_change
     FROM
@@ -152,8 +157,9 @@ def get_top_losers():
     top_losers = []
     for row in rows:
         top_losers.append({
-            'company_name': row[0],
-            'percentage_change': float(row[1])  # Преобразование в float
+            'figi_id': row[0],
+            'company_name': row[1],
+            'percentage_change': float(row[2])  # Преобразование в float
         })
     cur.close()
     conn.close()
