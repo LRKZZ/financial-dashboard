@@ -1,0 +1,109 @@
+.chart-component {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.header {
+    color: white;
+    padding: 20px;
+    border-radius: 10px 10px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    margin-bottom: 20px;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.header p {
+    margin: 0;
+}
+
+.price {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    margin-bottom: 20px;
+}
+
+.price h2 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.price .buttons {
+    display: flex;
+}
+
+.price .buttons button {
+    background-color: #ffcc00;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.price .buttons button:nth-child(1) {
+    background-color: #ff5722;
+}
+
+.chart-container {
+    width: 100%;
+    max-width: 1200px;
+    margin-bottom: 20px;
+}
+
+.dividends {
+    background-color: #e3f2fd;
+    padding: 10px;
+    border-radius: 5px;
+    width: 100%;
+    max-width: 1200px;
+    text-align: left;
+}
+
+.back-button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.price-display.price-up {
+    animation: price-up-animation 1s;
+}
+
+.price-display.price-down {
+    animation: price-down-animation 1s;
+}
+
+@keyframes price-up-animation {
+    0% {
+        background-color: rgba(0, 255, 0, 0.2);
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+@keyframes price-down-animation {
+    0% {
+        background-color: rgba(255, 0, 0, 0.2);
+    }
+    100% {
+        background-color: transparent;
+    }
+}
