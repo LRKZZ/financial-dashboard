@@ -8,6 +8,8 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.7.2",
+    "chart.js": "^4.4.3",
+    "chartjs-gauge": "^0.3.0",
     "framer-motion": "^11.2.13",
     "lightweight-charts": "^4.1.6",
     "react": "^18.3.1",
