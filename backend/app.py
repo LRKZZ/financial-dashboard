@@ -3,6 +3,8 @@ import psycopg2
 import json
 from dotenv import load_dotenv
 import os
+import ta
+import pandas as pd
 
 load_dotenv()
 
@@ -19,6 +21,35 @@ def get_db_connection():
         port="5432"
     )
     return conn
+
+def calculate_technical_indicators(df):
+    indicators = {}
+
+    df['rsi'] = ta.momentum.RSIIndicator(df['close']).rsi()
+    df['stoch'] = ta.momentum.StochasticOscillator(df['high'], df['low'], df['close']).stoch()
+    df['stochrsi'] = ta.momentum.StochRSIIndicator(df['close']).stochrsi()
+    df['macd'] = ta.trend.MACD(df['close']).macd()
+    df['adx'] = ta.trend.ADXIndicator(df['high'], df['low'], df['close']).adx()
+    df['williams_r'] = ta.momentum.WilliamsRIndicator(df['high'], df['low'], df['close']).williams_r()
+    df['cci'] = ta.trend.CCIIndicator(df['high'], df['low'], df['close']).cci()
+    df['atr'] = ta.volatility.AverageTrueRange(df['high'], df['low'], df['close']).average_true_range()
+    df['ult_osc'] = ta.momentum.UltimateOscillator(df['high'], df['low'], df['close']).ultimate_oscillator()
+    df['roc'] = ta.momentum.ROCIndicator(df['close']).roc()
+    df['bull_bear_power'] = df['close'] - ta.trend.EMAIndicator(df['close'], window=13).ema_indicator()
+
+    indicators['rsi'] = df['rsi'].iloc[-1]
+    indicators['stoch'] = df['stoch'].iloc[-1]
+    indicators['stochrsi'] = df['stochrsi'].iloc[-1]
+    indicators['macd'] = df['macd'].iloc[-1]
+    indicators['adx'] = df['adx'].iloc[-1]
+    indicators['williams_r'] = df['williams_r'].iloc[-1]
+    indicators['cci'] = df['cci'].iloc[-1]
+    indicators['atr'] = df['atr'].iloc[-1]
+    indicators['ult_osc'] = df['ult_osc'].iloc[-1]
+    indicators['roc'] = df['roc'].iloc[-1]
+    indicators['bull_bear_power'] = df['bull_bear_power'].iloc[-1]
+
+    return indicators
 
 @app.route('/api/top_volume', methods=['GET'])
 def get_top_volume():
@@ -200,7 +231,7 @@ def get_candles():
     candles = []
     for row in rows:
         candles.append({
-            'time': row[0].timestamp(),
+            'time': row[0].timestamp(),  # преобразование времени в UNIX timestamp
             'open': float(row[1]),
             'low': float(row[2]),
             'high': float(row[3]),
@@ -210,7 +241,11 @@ def get_candles():
     company_name = cur.fetchone()[0]
     cur.close()
     conn.close()
-    return jsonify({'candles': candles, 'company_name': company_name})
+
+    df = pd.DataFrame(candles)
+    indicators = calculate_technical_indicators(df)
+
+    return jsonify({'candles': candles, 'company_name': company_name, 'indicators': indicators})
 
 if __name__ == '__main__':
     app.run(debug=True)
