@@ -25,18 +25,42 @@ def get_top_volume():
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute('''
-    SELECT 
-        c.figi_id,
-        f.company_name,
-        SUM(c.volume) as total_volume
-    FROM 
-        candles c
-    JOIN
-        figi_numbers f ON c.figi_id = f.figi_id
-    WHERE 
-        date_trunc('day', c.time_of_candle) = current_date
-    GROUP BY 
-        c.figi_id, f.company_name
+    WITH daily_prices AS (
+        SELECT 
+            c.figi_id,
+            f.company_name,
+            SUM(c.volume) as total_volume,
+            MIN(c.time_of_candle) AS first_time,
+            MAX(c.time_of_candle) AS last_time
+        FROM 
+            candles c
+        JOIN
+            figi_numbers f ON c.figi_id = f.figi_id
+        WHERE 
+            date_trunc('day', c.time_of_candle) = current_date
+        GROUP BY 
+            c.figi_id, f.company_name
+    ),
+    price_changes AS (
+        SELECT
+            dp.figi_id,
+            dp.company_name,
+            dp.total_volume,
+            (last_price.close_price - first_price.close_price) / first_price.close_price * 100 AS percentage_change
+        FROM
+            daily_prices dp
+        JOIN
+            candles first_price ON dp.figi_id = first_price.figi_id AND dp.first_time = first_price.time_of_candle
+        JOIN
+            candles last_price ON dp.figi_id = last_price.figi_id AND dp.last_time = last_price.time_of_candle
+    )
+    SELECT
+        figi_id,
+        company_name,
+        total_volume,
+        percentage_change
+    FROM
+        price_changes
     ORDER BY 
         total_volume DESC
     LIMIT 10;
@@ -47,7 +71,8 @@ def get_top_volume():
         top_volume.append({
             'figi_id': row[0],
             'company_name': row[1],
-            'total_volume': int(row[2])  # Преобразование в int
+            'total_volume': int(row[2]), 
+            'percentage_change': float(row[3])  
         })
     cur.close()
     conn.close()
@@ -103,7 +128,7 @@ def get_top_gainers():
         top_gainers.append({
             'figi_id': row[0],
             'company_name': row[1],
-            'percentage_change': float(row[2])  # Преобразование в float
+            'percentage_change': float(row[2]) 
         })
     cur.close()
     conn.close()
@@ -159,7 +184,7 @@ def get_top_losers():
         top_losers.append({
             'figi_id': row[0],
             'company_name': row[1],
-            'percentage_change': float(row[2])  # Преобразование в float
+            'percentage_change': float(row[2]) 
         })
     cur.close()
     conn.close()
@@ -175,7 +200,7 @@ def get_candles():
     candles = []
     for row in rows:
         candles.append({
-            'time': row[0].timestamp(),  # преобразование времени в UNIX timestamp
+            'time': row[0].timestamp(),
             'open': float(row[1]),
             'low': float(row[2]),
             'high': float(row[3]),
