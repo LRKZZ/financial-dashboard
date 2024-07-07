@@ -28,7 +28,7 @@
 }
 
 .company-header {
-    width: 80%; /* Увеличенная ширина */
+    width: 80%;
     padding: 20px;
     border-radius: 10px;
     color: #fff;
@@ -42,7 +42,7 @@
 .company-info {
     display: flex;
     flex-direction: column;
-    justify-content: center; /* Центрирование по вертикали */
+    justify-content: center;
 }
 
 .company-name {
@@ -55,8 +55,8 @@
 }
 
 .company-logo {
-    width: 100px; /* Увеличенный размер логотипа */
-    height: 100px; /* Увеличенный размер логотипа */
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     position: absolute;
     right: 20px;
@@ -65,7 +65,7 @@
 }
 
 .price-section {
-    width: 80%; /* Совпадающая ширина */
+    width: 80%;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -103,38 +103,35 @@
 }
 
 .chart-container {
-    width: 80%; /* Совпадающая ширина */
+    width: 80%;
     height: 400px;
     margin-bottom: 20px;
 }
 
-.navbar {
-    width: 100%;
+.technical-indicators {
+    width: 80%;
+}
+
+.technical-summary {
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
     margin-bottom: 20px;
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #e9ecef;
 }
 
-.navbar button {
-    background-color: transparent;
-    color: #343a40;
-    border: none;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
+.technical-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.technical-table th, .technical-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+.technical-table th {
+    background-color: #f2f2f2;
     font-weight: bold;
-    border-radius: 0;
-    border-bottom: 2px solid transparent;
-}
-
-.navbar button:hover {
-    color: #007bff;
-    border-bottom: 2px solid #007bff;
-}
-
-.navbar button.active {
-    color: #007bff;
-    border-bottom: 2px solid #007bff;
 }
