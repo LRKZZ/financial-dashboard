@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { createChart } from 'lightweight-charts';
-import { useParams, useNavigate } from 'react-router-dom';
 import './ChartComponent.css';
 
 const companyColors = {
@@ -20,6 +20,7 @@ const companyColors = {
 function ChartComponent() {
     const { figi_id } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const [data, setData] = useState([]);
     const [companyName, setCompanyName] = useState('');
     const [lastPrice, setLastPrice] = useState(null);
@@ -53,7 +54,7 @@ function ChartComponent() {
                     // Initialize chart
                     const chartProperties = {
                         width: chartContainerRef.current.clientWidth,
-                        height: chartContainerRef.current.clientHeight,
+                        height: 400,
                         timeScale: {
                             timeVisible: true,
                             secondsVisible: false,
@@ -107,22 +108,23 @@ function ChartComponent() {
 
     return (
         <div className="chart-component">
-            <div className="header" style={{ backgroundColor: companyColors[figi_id] }}>
-                <h1>{companyName}</h1>
-                <p>Сектор: Финансовый сектор</p>
+            <div className="navbar">
+                <button className={location.pathname === '/' ? 'active' : ''} onClick={() => navigate('/')}>Топ по обороту</button>
+                <button className={location.pathname === '/' ? 'active' : ''} onClick={() => navigate('/')}>Взлеты дня</button>
+                <button className={location.pathname === '/' ? 'active' : ''} onClick={() => navigate('/')}>Падения дня</button>
+                <button className={location.pathname === '/' ? 'active' : ''} onClick={() => navigate('/')}>Главное меню</button>
             </div>
-            <div className="price">
-                <h2 className={`price-display ${priceChangeClass}`}>{lastPrice}₽</h2>
-                <div className="buttons">
-                    <button>Продать</button>
-                    <button>Купить</button>
+            <div className="company-header" style={{ backgroundColor: companyColors[figi_id] }}>
+                <div className="company-info">
+                    <h1 className="company-name">{companyName}</h1>
+                    <p className="company-sector">Сектор: Финансовый сектор</p>
                 </div>
+                <img src={`/company_logos/${figi_id}.1.png`} alt={`${companyName} logo`} className="company-logo" />
             </div>
-            <div className="chart-container" ref={chartContainerRef} style={{ width: '100%', height: '600px' }}></div>
-            <div className="dividends">
-                <p>Чтобы получить будущие дивиденды в размере 33,3₽ на одну акцию, нужно чтобы бумаги были в портфеле до конца 10.07.2024.</p>
+            <div className="price-section">
+                <h2 className={`price-display ${priceChangeClass}`}>{lastPrice}₽</h2>
             </div>
-            <button onClick={() => navigate('/')} className="back-button">Назад в главное меню</button>
+            <div className="chart-container" ref={chartContainerRef}></div>
         </div>
     );
 }
