@@ -1,20 +1,19 @@
-import os
-from dotenv import load_dotenv
 import asyncio
-import logging
+import redis
 from datetime import datetime, timedelta, timezone
 from tinkoff.invest import AsyncClient, CandleInterval
+import os
+from dotenv import load_dotenv
 import json
-import sys
-import redis.asyncio as redis
 
-# Загрузка токена из файла .env
 load_dotenv()
 
-TOKEN = os.getenv("TOKEN")
-REDIS_HOST = 'localhost'
-REDIS_PORT = 6379
+# Подключение к Redis
+redis_client = redis.StrictRedis(host="localhost", port=6379, decode_responses=True)
 
+TOKEN = os.getenv("TOKEN")
+
+# Список figi
 figi_list = {
     1: "BBG004731032",
     2: "BBG004731354",
@@ -28,80 +27,52 @@ figi_list = {
     10: "BBG004S68614"
 }
 
-class AsyncCustomIndex:
-    def __init__(self, token, figi_list, redis_host, redis_port):
-        self.token = token
-        self.figi_list = figi_list
-        self.redis_client = redis.from_url(f"redis://{redis_host}:{redis_port}")
-        self.logger = self.__create_logger()
+async def save_to_redis(figi_id, candle_data):
+    key = f"{figi_id}_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}"
+    redis_client.set(key, json.dumps(candle_data))
+    print(f"Данные записаны в Redis: {key}")
 
-    def __create_logger(self):
-        logger = logging.getLogger()
-        logger.setLevel(logging.INFO)
-        formatter = logging.Formatter('--> %(asctime)s - %(name)s - %(levelname)s - %(message)s')
+async def get_last_redis_data(figi_id):
+    keys = redis_client.keys(f"{figi_id}_*")
+    if keys:
+        last_key = sorted(keys)[-1]
+        return json.loads(redis_client.get(last_key))
+    return None
 
-        sh = logging.StreamHandler(sys.stdout)
-        sh.setFormatter(formatter)
-        logger.addHandler(sh)
-
-        return logger
-
-    async def fetch_candle(self, client, figi):
-        try:
-            now = datetime.now(timezone.utc)
-            from_ = now - timedelta(minutes=1)
-            to_ = now  
-            candles = await client.market_data.get_candles(
-                figi=figi,
-                from_=from_,
-                to=to_,
-                interval=CandleInterval.CANDLE_INTERVAL_1_MIN
-            )
-            return candles.candles[-1] if candles.candles else None
-        except Exception as e:
-            self.logger.exception(e)
-
-    async def get_previous_data(self, figi_number):
-        pattern = f"{figi_number}_*"
-        keys = await self.redis_client.keys(pattern)
-        if keys:
-            latest_key = max(keys)
-            latest_data = await self.redis_client.get(latest_key)
-            return json.loads(latest_data)
-        return None
-
-    async def process_figi(self, client, figi_number, figi):
-        candle = await self.fetch_candle(client, figi)
-        if candle:
-            data = {
-                "time": candle.time.isoformat(),
-                "open": candle.open.units + candle.open.nano / 1e9,
-                "high": candle.high.units + candle.high.nano / 1e9,
-                "low": candle.low.units + candle.low.nano / 1e9,
-                "close": candle.close.units + candle.close.nano / 1e9,
-                "volume": candle.volume
-            }
+async def fetch_data_for_figi(client, figi_id, figi):
+    from_time = datetime.now(timezone.utc) - timedelta(minutes=1)
+    candles = await client.market_data.get_candles(
+        figi=figi,
+        from_=from_time,
+        to=datetime.now(timezone.utc),
+        interval=CandleInterval.CANDLE_INTERVAL_1_MIN,
+    )
+    data = []
+    for candle in candles.candles:
+        data.append({
+            "time": candle.time.isoformat(),
+            "open": candle.open.units + candle.open.nano / 1e9,
+            "high": candle.high.units + candle.high.nano / 1e9,
+            "low": candle.low.units + candle.low.nano / 1e9,
+            "close": candle.close.units + candle.close.nano / 1e9,
+            "volume": candle.volume
+        })
+    if data:
+        await save_to_redis(figi_id, data)
+    else:
+        last_data = await get_last_redis_data(figi_id)
+        if last_data:
+            await save_to_redis(figi_id, last_data)
+            print(f"Данные заменились прошлым значением: {last_data}")
         else:
-            self.logger.info(f"No new data for {figi}. Fetching previous data.")
-            data = await self.get_previous_data(figi_number)
-            if data:
-                data['time'] = datetime.now(timezone.utc).isoformat()
-        
-        if data:  # Проверяем, что data не None перед использованием
-            key = f"{figi_number}_{datetime.now(timezone.utc).strftime('%Y_%m_%d_%H_%M_%S')}"
-            await self.redis_client.set(key, json.dumps(data))
-            self.logger.info(f"Data for {figi_number} stored in Redis with key {key}")
+            print(f"Нет данных для figi_id: {figi_id} и отсутствуют прошлые данные в Redis")
 
-    async def stream_data(self):
-        async with AsyncClient(self.token) as client:
-            while True:
-                tasks = [self.process_figi(client, figi_number, figi) for figi_number, figi in self.figi_list.items()]
-                await asyncio.gather(*tasks)
-                await asyncio.sleep(60)
-
-async def main():
-    index = AsyncCustomIndex(TOKEN, figi_list, REDIS_HOST, REDIS_PORT)
-    await index.stream_data()
+async def fetch_and_store_data():
+    async with AsyncClient(TOKEN) as client:
+        while True:
+            tasks = [fetch_data_for_figi(client, figi_id, figi) for figi_id, figi in figi_list.items()]
+            await asyncio.gather(*tasks)
+            await asyncio.sleep(60)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(fetch_and_store_data())

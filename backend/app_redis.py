@@ -39,7 +39,7 @@ def get_candles_for_figi(figi_id):
     for key in keys:
         data = redis_client.get(key)
         if data:
-            candle = json.loads(data)
+            candle = json.loads(data)[0]
             total_volume += candle['volume']
             if first_candle is None:
                 first_candle = candle
@@ -47,48 +47,13 @@ def get_candles_for_figi(figi_id):
 
     return first_candle, last_candle, total_volume
 
-@app.route('/api/candles', methods=['GET'])
-def get_candles():
-    figi_id = request.args.get('figi_id', default=1, type=int)
-    
-    if figi_id not in figi_list:
-        return jsonify({'error': 'Invalid figi_id'}), 400
-    
-    figi, company_name = figi_list[figi_id]
-    
-    pattern = f"{figi_id}_*"
-    keys = redis_client.keys(pattern)
-    
-    if not keys:
-        return jsonify({'error': 'No data found'}), 404
-    
-    keys.sort()
-    candles = []
-    
-    for key in keys:
-        data = redis_client.get(key)
-        if data:
-            candle = json.loads(data)
-            dt = datetime.fromisoformat(candle["time"])
-            dt_plus_3_hours = dt + timedelta(hours=3)
-            timestamp_plus_3_hours = int(dt_plus_3_hours.timestamp())
-
-            candles.append({
-                'time': timestamp_plus_3_hours,
-                'open': candle['open'],
-                'low': candle['low'],
-                'high': candle['high'],
-                'close': candle['close'],
-                'volume': candle['volume'],
-            })
-    
-    response_data = json.dumps({'candles': candles, 'company_name': company_name}, ensure_ascii=False, indent=4)
-    response = Response(response_data, content_type='application/json; charset=utf-8')
-    print({'candles': candles, 'company_name': company_name})
-    return response
-
 @app.route('/api/top_volume', methods=['GET'])
 def get_top_volume():
+    cache_key = "top_volume"
+    cached_data = redis_client.get(cache_key)
+    if cached_data:
+        return jsonify(json.loads(cached_data))
+
     top_volume = []
 
     for figi_id, (figi, company_name) in figi_list.items():
@@ -105,10 +70,69 @@ def get_top_volume():
     top_volume.sort(key=lambda x: x['total_volume'], reverse=True)
     top_volume = top_volume[:10]
 
+    # Cache the response data
+    redis_client.setex(cache_key, timedelta(minutes=10), json.dumps(top_volume))
+
     return jsonify(top_volume)
+
+@app.route('/api/candles', methods=['GET'])
+def get_candles():
+    figi_id = request.args.get('figi_id', default=1, type=int)
+    
+    if figi_id not in figi_list:
+        return jsonify({'error': 'Invalid figi_id'}), 400
+    
+    figi, company_name = figi_list[figi_id]
+
+    cache_key = f"candles_{figi_id}"
+    cached_data = redis_client.get(cache_key)
+    if cached_data:
+        return Response(cached_data, content_type='application/json; charset=utf-8')
+
+    pattern = f"{figi_id}_*"
+    keys = redis_client.keys(pattern)
+    
+    if not keys:
+        return jsonify({'error': 'No data found'}), 404
+    
+    keys.sort()
+    candles = []
+    
+    for key in keys:
+        data = redis_client.get(key)
+        if data:
+            candle = json.loads(data)[0]
+            dt = datetime.fromisoformat(candle["time"])
+            dt_plus_3_hours = dt + timedelta(hours=3)
+            timestamp_plus_3_hours = int(dt_plus_3_hours.timestamp())
+            candles.append({
+                'time': timestamp_plus_3_hours,
+                'open': candle['open'],
+                'low': candle['low'],
+                'high': candle['high'],
+                'close': candle['close'],
+                'volume': candle['volume'],
+            })
+    
+    candles.sort(key=lambda x: x['time'])
+    response_data = json.dumps({'candles': candles, 'company_name': company_name}, ensure_ascii=False, indent=4)
+    
+    # Cache the response data
+    redis_client.setex(cache_key, timedelta(minutes=10), response_data)
+
+    response = Response(response_data, content_type='application/json; charset=utf-8')
+    print({'candles': candles, 'company_name': company_name})
+    return response
+
+
 
 @app.route('/api/top_gainers', methods=['GET'])
 def get_top_gainers():
+    cache_key = "top_gainers"
+    cached_data = redis_client.get(cache_key)
+    if cached_data:
+        return jsonify(json.loads(cached_data))
+
     top_gainers = []
 
     for figi_id, (figi, company_name) in figi_list.items():
@@ -126,12 +150,18 @@ def get_top_gainers():
     top_gainers.sort(key=lambda x: x['percentage_change'], reverse=True)
     top_gainers = top_gainers[:10]
 
-
+    # Cache the response data
+    redis_client.setex(cache_key, timedelta(minutes=10), json.dumps(top_gainers))
 
     return jsonify(top_gainers)
 
 @app.route('/api/top_losers', methods=['GET'])
 def get_top_losers():
+    cache_key = "top_losers"
+    cached_data = redis_client.get(cache_key)
+    if cached_data:
+        return jsonify(json.loads(cached_data))
+
     top_losers = []
 
     for figi_id, (figi, company_name) in figi_list.items():
@@ -149,7 +179,11 @@ def get_top_losers():
     top_losers.sort(key=lambda x: x['percentage_change'])
     top_losers = top_losers[:10]
 
+    # Cache the response data
+    redis_client.setex(cache_key, timedelta(minutes=10), json.dumps(top_losers))
+
     return jsonify(top_losers)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -100,7 +100,7 @@ function ChartComponent() {
     useEffect(() => {
         fetchData(timeFrame);
 
-        const intervalId = setInterval(() => fetchData(timeFrame), 30000); // Fetch data every minute
+        const intervalId = setInterval(() => fetchData(timeFrame), 20000); // Fetch data every minute
 
         return () => clearInterval(intervalId); // Cleanup interval on component unmount
     }, [figi_id, timeFrame]);

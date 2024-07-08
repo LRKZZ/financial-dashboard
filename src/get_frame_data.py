@@ -9,7 +9,10 @@ keys = list(map(lambda key: key.decode("utf-8").split("_"), client.keys("*")))
 data = {i: [] for i in range(1, 11)}
 
 for key in keys:
-    key_converted = list(map(lambda x: int(x), key))
+    try:
+        key_converted = list(map(lambda x: int(x), key))
+    except:
+        continue
     figi_id = key_converted[0]
     date = datetime.datetime(*key_converted[1:])
     redis_key = "_".join(key)
@@ -18,8 +21,8 @@ for key in keys:
 
 # Основная функция получения данных
 def receiving_data_for_n_interval(data: dict, figi_id: int, minutes: int) -> dict:
-    keys_n_minutes = sorted(data[figi_id], key=lambda x: x[0])[:minutes]
-
+    keys_n_minutes = sorted(data[figi_id], key=lambda x: x[0], reverse=True)[:minutes]
+    keys_n_minutes = sorted(keys_n_minutes, key=lambda x: x[0])
     avg_candle = {
         "time": [],
         "open": [],
@@ -30,9 +33,9 @@ def receiving_data_for_n_interval(data: dict, figi_id: int, minutes: int) -> dic
     }
 
     for key in keys_n_minutes:
-        value = client.get(key[1])
+        value = client.get(key[1])  
+        value_dict = json.loads(value.decode("utf-8"))[0]
         print(value)
-        value_dict = json.loads(value.decode("utf-8"))
         avg_candle['open'].append(value_dict['open'])
         avg_candle['high'].append(value_dict['high'])
         avg_candle['low'].append(value_dict['low'])
@@ -47,5 +50,5 @@ def receiving_data_for_n_interval(data: dict, figi_id: int, minutes: int) -> dic
             "sum_volume": sum(avg_candle["volume"])
         }
 
-result = receiving_data_for_n_interval(data, figi_id=6, minutes=10)
+result = receiving_data_for_n_interval(data, figi_id=6, minutes=5)
 print(result)
