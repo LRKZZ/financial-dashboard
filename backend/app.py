@@ -221,26 +221,80 @@ def get_top_losers():
     conn.close()
     return jsonify(top_losers)
 
+def aggregate_candles_query(time_frame):
+    if time_frame == '1m':
+        return '''
+        SELECT
+            time_of_candle AS bucket,
+            open_price,
+            low_price,
+            high_price,
+            close_price,
+            volume
+        FROM
+            candles
+        WHERE
+            figi_id = %s
+        ORDER BY
+            bucket
+        '''
+    elif time_frame == '5m':
+        interval = '5 minute'
+    elif time_frame == '10m':
+        interval = '10 minute'
+    elif time_frame == '1h':
+        interval = '1 hour'
+    else:
+        raise ValueError("Invalid time frame")
+
+    return f'''
+    SELECT
+        date_trunc('{interval}', time_of_candle) AS bucket,
+        first(open_price) OVER (PARTITION BY date_trunc('{interval}', time_of_candle) ORDER BY time_of_candle) AS open_price,
+        MIN(low_price) AS low_price,
+        MAX(high_price) AS high_price,
+        last(close_price) OVER (PARTITION BY date_trunc('{interval}', time_of_candle) ORDER BY time_of_candle) AS close_price,
+        SUM(volume) AS volume
+    FROM
+        candles
+    WHERE
+        figi_id = %s
+    GROUP BY
+        date_trunc('{interval}', time_of_candle)
+    ORDER BY
+        bucket
+    '''
+
 @app.route('/api/candles', methods=['GET'])
 def get_candles():
     figi_id = request.args.get('figi_id', default=1, type=int)
+    time_frame = request.args.get('time_frame', default='1m', type=str)
+
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute('SELECT time_of_candle, open_price, low_price, high_price, close_price FROM candles WHERE figi_id = %s ORDER BY time_of_candle ASC', (figi_id,))
-    rows = cur.fetchall()
-    candles = []
-    for row in rows:
-        candles.append({
-            'time': row[0].timestamp(),  # преобразование времени в UNIX timestamp
-            'open': float(row[1]),
-            'low': float(row[2]),
-            'high': float(row[3]),
-            'close': float(row[4])
-        })
-    cur.execute('SELECT company_name FROM figi_numbers WHERE figi_id = %s', (figi_id,))
-    company_name = cur.fetchone()[0]
-    cur.close()
-    conn.close()
+    
+    try:
+        query = aggregate_candles_query(time_frame)
+        cur.execute(query, (figi_id,))
+        rows = cur.fetchall()
+        
+        candles = []
+        for row in rows:
+            candles.append({
+                'time': int(row[0].timestamp()),
+                'open': float(row[1]),
+                'low': float(row[2]),
+                'high': float(row[3]),
+                'close': float(row[4]),
+                'volume': int(row[5])
+            })
+
+        cur.execute('SELECT company_name FROM figi_numbers WHERE figi_id = %s', (figi_id,))
+        company_name = cur.fetchone()[0]
+        
+    finally:
+        cur.close()
+        conn.close()
 
     df = pd.DataFrame(candles)
     indicators = calculate_technical_indicators(df)
