@@ -1,0 +1,67 @@
+.detailed-list {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.detailed-list .back-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.detailed-list .back-button:hover {
+    background-color: #0056b3;
+}
+
+.detailed-list h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.detailed-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.detailed-list .list-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
+    cursor: pointer;
+}
+
+.detailed-list .list-item:hover {
+    background-color: #f1f1f1; 
+}
+
+.company-logo2 {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.company-info {
+    flex: 1;
+}
+
+.percent-change {
+    font-weight: bold;
+}
+
+.positive {
+    color: green;
+}
+
+.negative {
+    color: red;
+}
