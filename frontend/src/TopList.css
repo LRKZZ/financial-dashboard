@@ -14,6 +14,7 @@
 
 .top-section h2 {
     margin-bottom: 20px;
+    text-align: center;
 }
 
 .top-section ul {
@@ -22,11 +23,17 @@
     margin: 0;
 }
 
-.list-item {
+.top-section .list-item {
     display: flex;
     align-items: center;
     margin-bottom: 15px;
-    cursor: pointer;
+    cursor: pointer; /* Добавляем курсор указателя */
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
+}
+
+.top-section .list-item:hover {
+    background-color: #f1f1f1; /* Добавляем эффект при наведении */
 }
 
 .company-logo1 {
@@ -38,9 +45,6 @@
 
 .company-info {
     flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
 }
 
 .percent-change {
@@ -64,6 +68,7 @@ button {
     cursor: pointer;
     font-size: 16px;
     margin-top: 20px;
+    width: 100%;
 }
 
 button:hover {

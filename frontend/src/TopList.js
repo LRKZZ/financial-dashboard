@@ -7,7 +7,6 @@ const TopList = () => {
     const [topVolume, setTopVolume] = useState([]);
     const [topGainers, setTopGainers] = useState([]);
     const [topLosers, setTopLosers] = useState([]);
-    const [showAll, setShowAll] = useState({ volume: false, gainers: false, losers: false });
 
     const navigate = useNavigate();
 
@@ -51,7 +50,7 @@ const TopList = () => {
     }, []);
 
     const handleShowAll = (type) => {
-        setShowAll({ ...showAll, [type]: !showAll[type] });
+        navigate(`/detailed-list/${type}`);
     };
 
     const formatPercentage = (value) => {
@@ -77,33 +76,32 @@ const TopList = () => {
             <div className="top-section">
                 <h2>Топ по обороту</h2>
                 <ul>
-                    {renderListItems(showAll.volume ? topVolume : topVolume.slice(0, 3))}
+                    {renderListItems(topVolume.slice(0, 3))}
                 </ul>
                 <button onClick={() => handleShowAll('volume')}>
-                    {showAll.volume ? 'Скрыть' : 'Смотреть все'}
+                    Смотреть все
                 </button>
             </div>
             <div className="top-section">
                 <h2>Взлеты дня</h2>
                 <ul>
-                    {renderListItems(showAll.gainers ? topGainers : topGainers.slice(0, 3))}
+                    {renderListItems(topGainers.slice(0, 3))}
                 </ul>
                 <button onClick={() => handleShowAll('gainers')}>
-                    {showAll.gainers ? 'Скрыть' : 'Смотреть все'}
+                    Смотреть все
                 </button>
             </div>
             <div className="top-section">
                 <h2>Падения дня</h2>
                 <ul>
-                    {renderListItems(showAll.losers ? topLosers : topLosers.slice(0, 3))}
+                    {renderListItems(topLosers.slice(0, 3))}
                 </ul>
                 <button onClick={() => handleShowAll('losers')}>
-                    {showAll.losers ? 'Скрыть' : 'Смотреть все'}
+                    Смотреть все
                 </button>
             </div>
         </div>
     );
 };
-
 
 export default TopList;
