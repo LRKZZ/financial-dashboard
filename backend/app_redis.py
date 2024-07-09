@@ -2,7 +2,9 @@ from flask import Flask, jsonify, request, Response
 import json
 from dotenv import load_dotenv
 import redis
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
+import pandas as pd
+import ta
 
 load_dotenv()
 
@@ -22,6 +24,35 @@ figi_list = {
     9: ("BBG0047315D0", "Сургутнефтегаз"),
     10: ("BBG004S68614", "АФК Система")
 }
+
+def calculate_technical_indicators(df):
+    indicators = {}
+
+    df['rsi'] = ta.momentum.RSIIndicator(df['close']).rsi()
+    df['stoch'] = ta.momentum.StochasticOscillator(df['high'], df['low'], df['close']).stoch()
+    df['stochrsi'] = ta.momentum.StochRSIIndicator(df['close']).stochrsi()
+    df['macd'] = ta.trend.MACD(df['close']).macd()
+    df['adx'] = ta.trend.ADXIndicator(df['high'], df['low'], df['close']).adx()
+    df['williams_r'] = ta.momentum.WilliamsRIndicator(df['high'], df['low'], df['close']).williams_r()
+    df['cci'] = ta.trend.CCIIndicator(df['high'], df['low'], df['close']).cci()
+    df['atr'] = ta.volatility.AverageTrueRange(df['high'], df['low'], df['close']).average_true_range()
+    df['ult_osc'] = ta.momentum.UltimateOscillator(df['high'], df['low'], df['close']).ultimate_oscillator()
+    df['roc'] = ta.momentum.ROCIndicator(df['close']).roc()
+    df['bull_bear_power'] = df['close'] - ta.trend.EMAIndicator(df['close'], window=13).ema_indicator()
+
+    indicators['rsi'] = df['rsi'].iloc[-1]
+    indicators['stoch'] = df['stoch'].iloc[-1]
+    indicators['stochrsi'] = df['stochrsi'].iloc[-1]
+    indicators['macd'] = df['macd'].iloc[-1]
+    indicators['adx'] = df['adx'].iloc[-1]
+    indicators['williams_r'] = df['williams_r'].iloc[-1]
+    indicators['cci'] = df['cci'].iloc[-1]
+    indicators['atr'] = df['atr'].iloc[-1]
+    indicators['ult_osc'] = df['ult_osc'].iloc[-1]
+    indicators['roc'] = df['roc'].iloc[-1]
+    indicators['bull_bear_power'] = df['bull_bear_power'].iloc[-1]
+
+    return indicators
 
 def get_candles_for_figi(figi_id):
     today = datetime.now().date().isoformat()
@@ -70,7 +101,6 @@ def get_top_volume():
     top_volume.sort(key=lambda x: x['total_volume'], reverse=True)
     top_volume = top_volume[:10]
 
-    # Cache the response data
     redis_client.setex(cache_key, timedelta(minutes=10), json.dumps(top_volume))
 
     return jsonify(top_volume)
@@ -83,6 +113,8 @@ def get_candles():
         return jsonify({'error': 'Invalid figi_id'}), 400
     
     figi, company_name = figi_list[figi_id]
+
+
 
     cache_key = f"candles_{figi_id}"
     cached_data = redis_client.get(cache_key)
@@ -113,18 +145,17 @@ def get_candles():
                 'close': candle['close'],
                 'volume': candle['volume'],
             })
-    
+
     candles.sort(key=lambda x: x['time'])
-    response_data = json.dumps({'candles': candles, 'company_name': company_name}, ensure_ascii=False, indent=4)
+    print(candles)
+    df = pd.DataFrame(candles)
+    indicators = calculate_technical_indicators(df)
+    response_data = json.dumps({'candles': candles, 'company_name': company_name, 'indicators': indicators}, ensure_ascii=False, indent=4)
     
-    # Cache the response data
-    redis_client.setex(cache_key, timedelta(minutes=10), response_data)
+    redis_client.setex(cache_key, timedelta(minutes=2), response_data)
 
     response = Response(response_data, content_type='application/json; charset=utf-8')
-    print({'candles': candles, 'company_name': company_name})
     return response
-
-
 
 @app.route('/api/top_gainers', methods=['GET'])
 def get_top_gainers():
@@ -150,8 +181,7 @@ def get_top_gainers():
     top_gainers.sort(key=lambda x: x['percentage_change'], reverse=True)
     top_gainers = top_gainers[:10]
 
-    # Cache the response data
-    redis_client.setex(cache_key, timedelta(minutes=10), json.dumps(top_gainers))
+    redis_client.setex(cache_key, timedelta(minutes=2), json.dumps(top_gainers))
 
     return jsonify(top_gainers)
 
@@ -180,10 +210,9 @@ def get_top_losers():
     top_losers = top_losers[:10]
 
     # Cache the response data
-    redis_client.setex(cache_key, timedelta(minutes=10), json.dumps(top_losers))
+    redis_client.setex(cache_key, timedelta(minutes=2), json.dumps(top_losers))
 
     return jsonify(top_losers)
-
 
 if __name__ == '__main__':
     app.run(debug=True)
