@@ -35,8 +35,20 @@ async def save_to_redis(figi_id, candle_data):
 async def get_last_redis_data(figi_id):
     keys = redis_client.keys(f"{figi_id}_*")
     if keys:
+        key = f"{figi_id}_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}"
         last_key = sorted(keys)[-1]
+        last_value = redis_client.get(last_key)
+
+        value_dict = json.loads(last_value.decode("utf-8"))[0]
+        dt = datetime.fromisoformat(value_dict["time"])
+        dt_plus_one_minute = dt + timedelta(minutes=1)
+        value_dict["time"] = dt_plus_one_minute.isoformat()
+
+        updated_value = json.dumps([value_dict])
+        redis_client.set(key, updated_value)
+
         return json.loads(redis_client.get(last_key))
+    
     return None
 
 async def fetch_data_for_figi(client, figi_id, figi):
