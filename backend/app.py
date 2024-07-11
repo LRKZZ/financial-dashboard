@@ -165,6 +165,25 @@ def get_top_gainers():
     conn.close()
     return jsonify(top_gainers)
 
+@app.route('/api/search', methods=['GET'])
+def search_companies():
+    query = request.args.get('query', default='', type=str)
+    if query:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute('''
+            SELECT figi_id, company_name 
+            FROM figi_numbers 
+            WHERE company_name ILIKE %s
+            LIMIT 10;
+        ''', (f'%{query}%',))
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        results = [{'figi_id': row[0], 'company_name': row[1]} for row in rows]
+        return jsonify(results)
+    return jsonify([])
+
 @app.route('/api/top_losers', methods=['GET'])
 def get_top_losers():
     conn = get_db_connection()
