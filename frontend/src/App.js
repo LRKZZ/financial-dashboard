@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import TopList from './TopList';
 import ChartComponent from './ChartComponent';
 import DetailedList from './DetailedList';
+import VoiceAssistant from './VoiceAssistant';
 
 const App = () => {
     return (
@@ -11,6 +12,7 @@ const App = () => {
                 <Route path="/" element={<TopList />} />
                 <Route path="/chart/:figi_id" element={<ChartComponent />} />
                 <Route path="/detailed-list/:type" element={<DetailedList />} /> {/* Обновление пути */}
+                <Route path="/voice-assistant" element={<VoiceAssistant />} /> {/* Новый маршрут */}
             </Routes>
         </Router>
     );
