@@ -74,3 +74,69 @@ button {
 button:hover {
     background-color: #0056b3;
 }
+
+.top-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.top-sections {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.top-section {
+    width: 30%;
+    margin-bottom: 20px;
+}
+
+.search-section {
+    width: 100%;
+    margin-top: 20px;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+.list-item {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.company-logo1 {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+}
+
+.company-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.percent-change {
+    font-size: 14px;
+}
+
+.percent-change.positive {
+    color: green;
+}
+
+.percent-change.negative {
+    color: red;
+}
+
+.search-section input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}

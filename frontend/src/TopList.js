@@ -2,11 +2,14 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './TopList.css';
 import { useNavigate } from 'react-router-dom';
+import VoiceAssistant from './VoiceAssistant';
 
 const TopList = () => {
     const [topVolume, setTopVolume] = useState([]);
     const [topGainers, setTopGainers] = useState([]);
     const [topLosers, setTopLosers] = useState([]);
+    const [searchResults, setSearchResults] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const navigate = useNavigate();
 
@@ -71,35 +74,76 @@ const TopList = () => {
         ));
     };
 
+    const handleSearch = async (event) => {
+        setSearchQuery(event.target.value);
+        if (event.target.value.trim() === '') {
+            setSearchResults([]);
+            return;
+        }
+
+        try {
+            const result = await axios.get(`/api/search?query=${event.target.value}`);
+            setSearchResults(result.data);
+        } catch (error) {
+            console.error('Error searching companies:', error);
+        }
+    };
+
+    const renderSearchResults = () => {
+        return searchResults.map((item, index) => (
+            <li key={index} className="list-item" onClick={() => navigate(`/chart/${item.figi_id}`)}>
+                <img src={`/company_logos/${item.figi_id}.png`} alt={`${item.company_name} logo`} className="company-logo1" />
+                <div className="company-info">
+                    {item.company_name}
+                </div>
+            </li>
+        ));
+    };
+
     return (
         <div className="top-list">
-            <div className="top-section">
-                <h2>Топ по обороту</h2>
-                <ul>
-                    {renderListItems(topVolume.slice(0, 3))}
-                </ul>
-                <button onClick={() => handleShowAll('volume')}>
-                    Смотреть все
-                </button>
+            <div className="top-sections">
+                <div className="top-section">
+                    <h2>Топ по обороту</h2>
+                    <ul>
+                        {renderListItems(topVolume.slice(0, 3))}
+                    </ul>
+                    <button onClick={() => handleShowAll('volume')}>
+                        Смотреть все
+                    </button>
+                </div>
+                <div className="top-section">
+                    <h2>Взлеты дня</h2>
+                    <ul>
+                        {renderListItems(topGainers.slice(0, 3))}
+                    </ul>
+                    <button onClick={() => handleShowAll('gainers')}>
+                        Смотреть все
+                    </button>
+                </div>
+                <div className="top-section">
+                    <h2>Падения дня</h2>
+                    <ul>
+                        {renderListItems(topLosers.slice(0, 3))}
+                    </ul>
+                    <button onClick={() => handleShowAll('losers')}>
+                        Смотреть все
+                    </button>
+                </div>
             </div>
-            <div className="top-section">
-                <h2>Взлеты дня</h2>
+            <div className="search-section">
+                <h2>Поиск компании</h2>
+                <input
+                    type="text"
+                    placeholder="Введите название компании"
+                    value={searchQuery}
+                    onChange={handleSearch}
+                />
                 <ul>
-                    {renderListItems(topGainers.slice(0, 3))}
+                    {renderSearchResults()}
                 </ul>
-                <button onClick={() => handleShowAll('gainers')}>
-                    Смотреть все
-                </button>
             </div>
-            <div className="top-section">
-                <h2>Падения дня</h2>
-                <ul>
-                    {renderListItems(topLosers.slice(0, 3))}
-                </ul>
-                <button onClick={() => handleShowAll('losers')}>
-                    Смотреть все
-                </button>
-            </div>
+            <VoiceAssistant /> {/* Добавляем VoiceAssistant */}
         </div>
     );
 };
