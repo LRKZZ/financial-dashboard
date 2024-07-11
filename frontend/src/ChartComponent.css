@@ -40,7 +40,6 @@
     background: var(--company-color);
 }
 
-
 .company-info {
     display: flex;
     flex-direction: column;
@@ -167,3 +166,126 @@
     color: red;
 }
 
+.chart-component {
+    font-family: 'Roboto', sans-serif;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+}
+
+.navbar button {
+    margin: 5px;
+    padding: 10px;
+    background-color: #2196f3;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.navbar button:hover {
+    background-color: #1976d2;
+}
+
+.company-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    border-radius: 5px;
+    color: white;
+}
+
+.company-info {
+    flex-grow: 1;
+}
+
+.company-logo {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+}
+
+.price-section {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.price-display {
+    font-size: 2em;
+}
+
+.price-up {
+    color: green;
+    animation: price-change 1s ease-in-out;
+}
+
+.price-down {
+    color: red;
+    animation: price-change 1s ease-in-out;
+}
+
+@keyframes price-change {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.chart-container {
+    height: 400px;
+    margin-bottom: 20px;
+}
+
+.timeframe-buttons, .chart-type-buttons {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.timeframe-button, .chart-type-button {
+    margin: 0 5px;
+    padding: 10px 20px;
+    background-color: #e0e0e0;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.timeframe-button.active, .chart-type-button.active {
+    background-color: #2196f3;
+    color: white;
+}
+
+.technical-indicators {
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+}
+
+.technical-summary {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.technical-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.technical-table th, .technical-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.technical-table .positive {
+    color: green;
+}
+
+.technical-table .negative {
+    color: red;
+}

@@ -33,9 +33,10 @@ function ChartComponent() {
     const [priceChangeClass, setPriceChangeClass] = useState('');
     const [indicators, setIndicators] = useState({});
     const [timeFrame, setTimeFrame] = useState('1m');
+    const [chartType, setChartType] = useState('candlestick'); // Тип графика: 'candlestick' или 'line'
     const chartContainerRef = useRef();
     const chartRef = useRef();
-    const candleSeriesRef = useRef();
+    const seriesRef = useRef();
 
     const fetchData = async (frame) => {
         try {
@@ -74,9 +75,9 @@ function ChartComponent() {
 
                 const domElement = chartContainerRef.current;
                 chartRef.current = createChart(domElement, chartProperties);
-                candleSeriesRef.current = chartRef.current.addCandlestickSeries();
+                seriesRef.current = chartRef.current.addCandlestickSeries();
 
-                candleSeriesRef.current.setData(result.data.candles.map(item => ({
+                seriesRef.current.setData(result.data.candles.map(item => ({
                     time: item.time,
                     open: item.open,
                     high: item.high,
@@ -84,7 +85,7 @@ function ChartComponent() {
                     close: item.close
                 })));
             } else {
-                candleSeriesRef.current.setData(result.data.candles.map(item => ({
+                seriesRef.current.setData(result.data.candles.map(item => ({
                     time: item.time,
                     open: item.open,
                     high: item.high,
@@ -94,6 +95,28 @@ function ChartComponent() {
             }
         } catch (error) {
             console.error('Error fetching data:', error);
+        }
+    };
+
+    const switchSeries = (type) => {
+        if (seriesRef.current) {
+            chartRef.current.removeSeries(seriesRef.current);
+        }
+        if (type === 'candlestick') {
+            seriesRef.current = chartRef.current.addCandlestickSeries();
+            seriesRef.current.setData(data.map(item => ({
+                time: item.time,
+                open: item.open,
+                high: item.high,
+                low: item.low,
+                close: item.close
+            })));
+        } else if (type === 'line') {
+            seriesRef.current = chartRef.current.addLineSeries();
+            seriesRef.current.setData(data.map(item => ({
+                time: item.time,
+                value: item.close
+            })));
         }
     };
 
@@ -113,6 +136,12 @@ function ChartComponent() {
             return () => clearTimeout(timeoutId);
         }
     }, [priceChangeClass]);
+
+    useEffect(() => {
+        if (chartRef.current) {
+            switchSeries(chartType);
+        }
+    }, [chartType, data]);
 
     const getRecommendation = () => {
         const buyIndicators = ['macd', 'cci', 'roc', 'ult_osc'];
@@ -169,6 +198,20 @@ function ChartComponent() {
                         {timeFrames[frame]}
                     </button>
                 ))}
+            </div>
+            <div className="chart-type-buttons">
+                <button
+                    className={`chart-type-button ${chartType === 'candlestick' ? 'active' : ''}`}
+                    onClick={() => setChartType('candlestick')}
+                >
+                    Свечи
+                </button>
+                <button
+                    className={`chart-type-button ${chartType === 'line' ? 'active' : ''}`}
+                    onClick={() => setChartType('line')}
+                >
+                    Линия
+                </button>
             </div>
             <div className="technical-indicators">
                 <div className="technical-summary" style={{ color: recommendation.color }}>
