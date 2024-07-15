@@ -1,0 +1,41 @@
+/* CurrencyRates.css */
+.currency-rates {
+    width: 200px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    text-align: left;
+}
+
+.currency-rates h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+
+.rate-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.currency-name {
+    font-weight: bold;
+}
+
+.currency-rate {
+    color: #333;
+}
+
+.additional-info {
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.date-time {
+    color: #333;
+}

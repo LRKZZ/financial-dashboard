@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
-import './DetailedList.css';
+import '../styles/DetailedList.css';
 
 const DetailedList = () => {
     const { type } = useParams();

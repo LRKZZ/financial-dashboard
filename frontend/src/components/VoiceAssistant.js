@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './VoiceAssistant.css';
+import '../styles/VoiceAssistant.css';
+import Mic01Icon from './Mic01Icon'; 
 
 const companyList = {
     'лукойл': 1,
@@ -90,7 +91,7 @@ const VoiceAssistant = () => {
                 onClick={toggleListening} 
                 className={`mic-button ${isListening ? 'listening' : ''}`}
             >
-                <img src="/company_logos/micro.png" alt="Микрофон" className="mic-icon" />
+                <Mic01Icon /> {}
             </button>
         </div>
     );

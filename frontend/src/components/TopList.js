@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import './TopList.css';
+import '../styles/TopList.css';
+import CurrencyRates from './CurrencyRates';
 import { useNavigate } from 'react-router-dom';
 import VoiceAssistant from './VoiceAssistant';
+import StockPrices from './StockPrices';
+import TopGrowthDecline from './TopGrowthDecline';  // Импортируем новый компонент
 
 const TopList = () => {
     const [topVolume, setTopVolume] = useState([]);
@@ -90,18 +93,33 @@ const TopList = () => {
     };
 
     const renderSearchResults = () => {
-        return searchResults.map((item, index) => (
-            <li key={index} className="list-item" onClick={() => navigate(`/chart/${item.figi_id}`)}>
-                <img src={`/company_logos/${item.figi_id}.png`} alt={`${item.company_name} logo`} className="company-logo1" />
-                <div className="company-info">
-                    {item.company_name}
-                </div>
-            </li>
-        ));
+        return (
+            <ul className="search-results">
+                {searchResults.map((item, index) => (
+                    <li key={index} className="list-item" onClick={() => navigate(`/chart/${item.figi_id}`)}>
+                        <img src={`/company_logos/${item.figi_id}.png`} alt={`${item.company_name} logo`} className="company-logo1" />
+                        <div className="company-info">
+                            {item.company_name}
+                        </div>
+                    </li>
+                ))}
+            </ul>
+        );
     };
+
 
     return (
         <div className="top-list">
+            <CurrencyRates /> {/* Include CurrencyRates component */}
+            <div className="search-section">
+                <input
+                    type="text"
+                    placeholder="Название компании"
+                    value={searchQuery}
+                    onChange={handleSearch}
+                />
+                {searchQuery && renderSearchResults()}
+            </div>
             <div className="top-sections">
                 <div className="top-section">
                     <h2>Топ по обороту</h2>
@@ -131,18 +149,8 @@ const TopList = () => {
                     </button>
                 </div>
             </div>
-            <div className="search-section">
-                <h2>Поиск компании</h2>
-                <input
-                    type="text"
-                    placeholder="Введите название компании"
-                    value={searchQuery}
-                    onChange={handleSearch}
-                />
-                <ul>
-                    {renderSearchResults()}
-                </ul>
-            </div>
+            <StockPrices />
+            <TopGrowthDecline /> {/* Добавляем новый компонент */}
             <VoiceAssistant /> {/* Добавляем VoiceAssistant */}
         </div>
     );

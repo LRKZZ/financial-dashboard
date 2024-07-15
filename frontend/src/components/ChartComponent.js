@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import { createChart } from 'lightweight-charts';
-import './ChartComponent.css';
+import '../styles/ChartComponent.css';
 
 const companyColors = {
     1: 'linear-gradient(to right, #ff0000, #ff7373)', // ЛУКОЙЛ - красный градиент

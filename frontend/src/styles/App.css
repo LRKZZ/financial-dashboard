@@ -5,7 +5,7 @@ html, body, #root {
   height: 100%;
   margin: 0;
   padding: 0;
-  background-color: #ffffff;
+  background-color: #ddf2ed;
 }
 
 * {
@@ -19,12 +19,12 @@ html, body, #root {
   align-items: center;
   height: 100%;
   width: 100%;
-  background-color: #ffffff;
+  background-color: #ddf2ed;
   padding: 20px;
 }
 
 .header {
-  color: white;
+  color: #ddf2ed;
   padding: 20px;
   border-radius: 10px 10px 0 0;
   display: flex;

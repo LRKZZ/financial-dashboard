@@ -5,18 +5,20 @@
 }
 
 .detailed-list .back-button {
-    background-color: #007bff;
+    background-color: #148f2b;
     color: white;
     border: none;
     padding: 10px 20px;
-    border-radius: 5px;
+    border-radius: 13px;
     cursor: pointer;
     font-size: 16px;
     margin-bottom: 20px;
+    transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .detailed-list .back-button:hover {
-    background-color: #0056b3;
+    background-color: #18762a;
+    color: white;
 }
 
 .detailed-list h2 {

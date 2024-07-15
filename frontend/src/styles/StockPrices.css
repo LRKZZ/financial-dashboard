@@ -1,0 +1,71 @@
+.stock-prices {
+    width: 90%;
+    max-width: 960px; /* Уменьшенная максимальная ширина */
+    margin: 50px auto; /* Увеличенный отступ от верха */
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+}
+
+.prices-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+.price-item {
+    width: 45%; /* Уменьшенная ширина элементов */
+    background-color: #f8f8f8;
+    margin: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: background-color 0.5s ease;
+}
+
+.company-info {
+    text-align: le;
+}
+
+.company-name {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.company-price {
+    font-size: 1.2em;
+    color: #333;
+}
+
+.price-up {
+    background-color: rgba(0, 255, 0, 0.2);
+    animation: highlight-up 1.5s;
+}
+
+.price-down {
+    background-color: rgba(255, 0, 0, 0.2);
+    animation: highlight-down 1.5s;
+}
+
+@keyframes highlight-up {
+    from {
+        background-color: rgba(0, 255, 0, 0.5);
+    }
+    to {
+        background-color: transparent;
+    }
+}
+
+@keyframes highlight-down {
+    from {
+        background-color: rgba(255, 0, 0, 0.5);
+    }
+    to {
+        background-color: transparent;
+    }
+}
