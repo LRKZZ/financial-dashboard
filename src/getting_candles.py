@@ -33,7 +33,7 @@ def get_figi_id(figi_number):
         return figi_id
 
     except Exception as e:
-        print(f"Error fetching figi_id for {figi_number}: {e}")
+        print(f"Error fetching figi_id for {figi_number}: {e}") 
         return None
 
 def get_previous_candle_data(table_name, figi_id):
@@ -75,7 +75,7 @@ async def fetch_data(figi, interval, table_name, candle_interval):
     async with AsyncClient(token) as client:
         async for candle in client.get_all_candles(
             figi=figi,
-            from_=now() - timedelta(minutes=interval),
+            from_=now() - timedelta(minutes=1),
             interval=candle_interval,
         ):
             data.append((
@@ -95,7 +95,7 @@ async def fetch_data(figi, interval, table_name, candle_interval):
             previous_data = (current_time,) + previous_data + (figi_id,)
             data.append(previous_data)
 
-    print(data)
+    #print(data)
     return data
 
 def check_and_insert_data_to_db(data, table_name):

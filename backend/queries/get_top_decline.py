@@ -1,15 +1,14 @@
-from connection.get_db_connection import get_db_connection
 from flask import jsonify
+from connection.get_db_connection import get_db_connection
 import redis
 from datetime import timedelta
 import json
 
-
 redis_client = redis.StrictRedis(host="localhost", port=6379, decode_responses=True)
 
-def get_top_growth():
+def get_top_decline():
     
-    cache_key = "top_growth"
+    cache_key = "top_decline"
     cached_data = redis_client.get(cache_key)
     if cached_data:
         return jsonify(json.loads(cached_data))
@@ -20,22 +19,28 @@ def get_top_growth():
     WITH first_last_prices AS (
         SELECT
             figi_id,
-            FIRST_VALUE(close_price) OVER (PARTITION BY figi_id ORDER BY time_of_candle ASC) AS first_close_price,
-            LAST_VALUE(close_price) OVER (PARTITION BY figi_id ORDER BY time_of_candle ASC RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS last_close_price
+            MIN(time_of_candle) AS first_time,
+            MAX(time_of_candle) AS last_time
         FROM
             candles
+        GROUP BY
+            figi_id
     ),
     price_changes AS (
         SELECT
             flp.figi_id,
             f.company_name,
-            ((flp.last_close_price - flp.first_close_price) / flp.first_close_price * 100) AS growth_percentage
+            ((last_price.close_price - first_price.close_price) / first_price.close_price * 100) AS growth_percentage
         FROM
             first_last_prices flp
         JOIN
+            candles first_price ON flp.figi_id = first_price.figi_id AND flp.first_time = first_price.time_of_candle
+        JOIN
+            candles last_price ON flp.figi_id = last_price.figi_id AND flp.last_time = last_price.time_of_candle
+        JOIN
             figi_numbers f ON flp.figi_id = f.figi_id
         WHERE
-            ((flp.last_close_price - flp.first_close_price) / flp.first_close_price * 100) > 0
+            first_price.close_price IS NOT NULL AND last_price.close_price IS NOT NULL
     )
     SELECT
         figi_id,
@@ -43,14 +48,16 @@ def get_top_growth():
         growth_percentage
     FROM
         price_changes
+    WHERE
+        growth_percentage < 0
     ORDER BY
-        growth_percentage DESC
+        growth_percentage ASC
     LIMIT 10;
     ''')
     rows = cur.fetchall()
-    top_growth = []
+    top_decline = []
     for row in rows:
-        top_growth.append({
+        top_decline.append({
             'figi_id': row[0],
             'company_name': row[1],
             'percentage_change': float(row[2])
@@ -58,6 +65,6 @@ def get_top_growth():
     cur.close()
     conn.close()
     
-    redis_client.setex(cache_key, timedelta(minutes=1), json.dumps(top_growth))
+    redis_client.setex(cache_key, timedelta(minutes=1), json.dumps(top_decline))
     
-    return jsonify(top_growth)
+    return jsonify(top_decline)
