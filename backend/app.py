@@ -58,9 +58,11 @@ def get_currency():
 def get_top_declines():
     return get_top_decline()
 
+
 @app.route('/api/top_growth', methods=['GET'])
 def get_top_growths():
     return get_top_growth()
+    
     
 if __name__ == "__main__":
     app.run(debug=True)

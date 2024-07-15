@@ -36,7 +36,7 @@ def get_candle(figi_id, time_frame):
         cur.close()
         conn.close()
 
-    if time_frame == "1h":
+    if time_frame == "1m": # затычка
         df = pd.DataFrame(candles)
         indicators = calculate_technical_indicators(df)
     else:
