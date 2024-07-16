@@ -84,17 +84,17 @@ sudo service postgresql start
 
 3. Создание базы данных и нужных таблиц
    
-Войдите в `psql`
+Войдите в `psql`:
 ```bash
 sudo -u postgres psql
 ```
 
-Создайте базу данных
+Создайте базу данных:
 ```sql
 CREATE DATABASE financial_db;
 ```
 
-Создайте табилцу с наименованием `figi_numbers`
+Создайте табилцу с наименованием `figi_numbers`:
 ```sql
 CREATE TABLE figi_numbers (
     figi_id SERIAL PRIMARY KEY,
@@ -103,7 +103,7 @@ CREATE TABLE figi_numbers (
 );
 ```
 
-Создайте четыре таблицы с названиями `candles`, `candles_5_min`, `candles_10_min`, `candles_60_min`
+Создайте четыре таблицы с названиями `candles`, `candles_5_min`, `candles_10_min`, `candles_60_min`:
 ```sql
 CREATE TABLE candles (
     candles_id SERIAL PRIMARY KEY,
@@ -119,7 +119,7 @@ CREATE TABLE candles (
 
 4. Вставка значений в таблицу `figi_numbers`
    
-Выполните следующий sql-запрос
+Выполните следующий sql-запрос:
 ```sql
 INSERT INTO figi_numbers (figi_id, figi_number, company_name) VALUES
 (1, 'BBG004731032', 'Лукойл'),
@@ -133,7 +133,7 @@ INSERT INTO figi_numbers (figi_id, figi_number, company_name) VALUES
 (9, 'BBG0047315D0', 'Сургутнефтегаз'),
 (10, 'BBG004S68614', 'АФК Система');
 ```
-5. Выйдите из psql
+5. Выйдите из psql:
 
 ```sql
 \q
@@ -154,7 +154,7 @@ npm -v
    
 ## Клонирование репозитория и настройка VS-code
 
-1. Клонируйте репозиторий
+1. Клонируйте репозиторий:
 ```bash
 git clone git@github.com:LRKZZ/financial-dashboard.git
 ```
@@ -163,7 +163,7 @@ git clone git@github.com:LRKZZ/financial-dashboard.git
 3. Свяжите WSL и VS-code
 
 ## Установка зависимостей
-Откройте консоль VS-code и введите следующие команды
+Откройте консоль VS-code и введите следующие команды:
 
 ```bash
 sudo apt install python3
