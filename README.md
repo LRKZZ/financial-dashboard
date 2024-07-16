@@ -114,7 +114,8 @@ CREATE TABLE candles (
 ```
 
 4. Вставка значений в таблицу `figi_numbers`
-Вставьте следующие значения в таблицу
+   
+Выполните следующий sql запрос
 ```sql
 INSERT INTO figi_numbers (figi_id, figi_number, company_name) VALUES
 (1, 'BBG004731032', 'Лукойл'),
