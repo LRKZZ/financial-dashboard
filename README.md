@@ -134,6 +134,19 @@ INSERT INTO figi_numbers (figi_id, figi_number, company_name) VALUES
 ```sql
 \q
 ```
+
+## Установка React
+React требует наличия Node.js и npm (Node Package Manager). Эти инструменты помогут вам управлять зависимостями и запускать скрипты для разработки
+```bash
+sudo apt update
+sudo apt install nodejs npm -y
+```
+
+Убедитесь, что Node.js и npm установлены корректно, выполнив команды:
+```bash
+node -v
+npm -v
+```
    
 ## Клонирование репозитория и настройка VS-code
 
@@ -152,4 +165,42 @@ git clone git@github.com:LRKZZ/financial-dashboard.git
 sudo apt install python3
 python3 -m venv venv
 source venv/bin/activate
+pip install -r requiments.txt
+```
+
+## Запуск дашборда
+
+Откройте 3 терминала в VS-code и в каждый введите следущие строчки:
+
+1. Терминал 1:
+```bash
+cd backend
+```
+```python
+python3 app.py
+```
+
+2. Терминал 2:
+```bash
+cd src
+```
+```python
+python3 getting_candles.py
+```
+
+2. Терминал 2:
+```bash
+cd src
+```
+```python
+python3 getting_candles.py
+```
+
+2. Терминал 3:
+```bash
+cd frontend
+```
+```js
+npm install react-scripts
+npm start
 ```
