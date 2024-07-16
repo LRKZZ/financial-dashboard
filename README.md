@@ -44,6 +44,7 @@ supervised systemd
 Сохраните изменения и закройте редактор (`Ctrl + O`, `Enter`, `Ctrl + X`).
 
 3. Запуск и проверка Redis
+   
 Запустите Redis:
 ```bash
 sudo service redis-server start
