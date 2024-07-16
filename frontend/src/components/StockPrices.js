@@ -2,21 +2,9 @@ import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import '../styles/StockPrices.css';
 
-const companies = [
-    { id: 1, name: 'ЛУКОЙЛ' },
-    { id: 2, name: 'Роснефть' },
-    { id: 3, name: 'ВТБ' },
-    { id: 4, name: 'Газпром' },
-    { id: 5, name: 'МТС' },
-    { id: 6, name: 'Сбербанк' },
-    { id: 7, name: 'Новатэк' },
-    { id: 8, name: 'Интер РАО' },
-    { id: 9, name: 'Сургутнефтегаз' },
-    { id: 10, name: 'АФК Система' },
-];
-
 const StockPrices = () => {
     const [prices, setPrices] = useState([]);
+    const [companies, setCompanies] = useState([]);
     const previousPrices = useRef({});
 
     useEffect(() => {
@@ -29,10 +17,24 @@ const StockPrices = () => {
             }
         };
 
-        fetchPrices();
-        const intervalId = setInterval(fetchPrices, 60000); // Fetch prices every minute
+        const fetchCompanies = async () => {
+            try {
+                const response = await axios.get('/api/company_list');
+                const companyList = Object.entries(response.data).map(([name, details]) => ({
+                    id: details.id,
+                    name: name.charAt(0).toUpperCase() + name.slice(1)
+                }));
+                setCompanies(companyList);
+            } catch (error) {
+                console.error('Error fetching company list:', error);
+            }
+        };
 
-        return () => clearInterval(intervalId); // Cleanup interval on component unmount
+        fetchPrices();
+        fetchCompanies();
+        const intervalId = setInterval(fetchPrices, 60000); 
+
+        return () => clearInterval(intervalId);
     }, []);
 
     useEffect(() => {
@@ -64,7 +66,11 @@ const StockPrices = () => {
             <h2 className="latest-prices-title">Последние цены акций</h2>
             <div className="prices-grid">
                 {companies.map(company => (
-                    <div key={company.id} className="price-item" id={`price-${company.id}`}>
+                    <div
+                        key={company.id}
+                        className="price-item"
+                        id={`price-${company.id}`}
+                    >
                         <div className="company-info">
                             <span className="company-name">{company.name}</span>
                             <span className="company-price">{getPriceForCompany(company.id)} ₽</span>

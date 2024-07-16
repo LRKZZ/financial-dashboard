@@ -17,9 +17,9 @@ const CurrencyRates = () => {
         };
 
         fetchRates();
-        const intervalId = setInterval(fetchRates, 60000); // Fetch rates every minute
+        const intervalId = setInterval(fetchRates, 60000);
 
-        return () => clearInterval(intervalId); // Cleanup interval on component unmount
+        return () => clearInterval(intervalId); 
     }, []);
 
     useEffect(() => {
@@ -27,9 +27,9 @@ const CurrencyRates = () => {
             setDateTime(new Date());
         };
 
-        const intervalId = setInterval(updateDateTime, 1000); // Update date and time every second
+        const intervalId = setInterval(updateDateTime, 1000); 
 
-        return () => clearInterval(intervalId); // Cleanup interval on component unmount
+        return () => clearInterval(intervalId);
     }, []);
 
     return (

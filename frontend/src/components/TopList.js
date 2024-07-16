@@ -5,7 +5,7 @@ import CurrencyRates from './CurrencyRates';
 import { useNavigate } from 'react-router-dom';
 import VoiceAssistant from './VoiceAssistant';
 import StockPrices from './StockPrices';
-import TopGrowthDecline from './TopGrowthDecline';  // Импортируем новый компонент
+import TopGrowthDecline from './TopGrowthDecline'; 
 
 const TopList = () => {
     const [topVolume, setTopVolume] = useState([]);
@@ -110,7 +110,7 @@ const TopList = () => {
 
     return (
         <div className="top-list">
-            <CurrencyRates /> {/* Include CurrencyRates component */}
+            <CurrencyRates />
             <div className="search-section">
                 <input
                     type="text"
@@ -150,8 +150,8 @@ const TopList = () => {
                 </div>
             </div>
             <StockPrices />
-            <TopGrowthDecline /> {/* Добавляем новый компонент */}
-            <VoiceAssistant /> {/* Добавляем VoiceAssistant */}
+            <TopGrowthDecline />
+            <VoiceAssistant /> 
         </div>
     );
 };

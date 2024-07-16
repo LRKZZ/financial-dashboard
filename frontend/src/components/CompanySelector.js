@@ -1,19 +1,21 @@
-import React from 'react';
-
-const companies = [
-    { id: 1, name: 'ЛУКОЙЛ' },
-    { id: 2, name: 'Роснефть' },
-    { id: 3, name: 'ВТБ' },
-    { id: 4, name: 'Газпром' },
-    { id: 5, name: 'МТС' },
-    { id: 6, name: 'Сбербанк' },
-    { id: 7, name: 'Новатэк' },
-    { id: 8, name: 'Интер РАО' },
-    { id: 9, name: 'Сургутнефтегаз' },
-    { id: 10, name: 'АФК Система' }
-];
+import React, { useState, useEffect } from 'react';
 
 const CompanySelector = ({ onSelect }) => {
+    const [companies, setCompanies] = useState([]);
+
+    useEffect(() => {
+        fetch('/api/company_list')
+            .then(response => response.json())
+            .then(data => {
+                const companyArray = Object.keys(data).map(name => ({
+                    id: data[name],
+                    name: name.charAt(0).toUpperCase() + name.slice(1)
+                }));
+                setCompanies(companyArray);
+            })
+            .catch(error => console.error('Error fetching company list:', error));
+    }, []); 
+
     return (
         <div className="company-selector">
             <h1>Выберите компанию</h1>

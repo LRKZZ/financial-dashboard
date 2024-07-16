@@ -11,8 +11,8 @@ const App = () => {
             <Routes>
                 <Route path="/" element={<TopList />} />
                 <Route path="/chart/:figi_id" element={<ChartComponent />} />
-                <Route path="/detailed-list/:type" element={<DetailedList />} /> {/* Обновление пути */}
-                <Route path="/voice-assistant" element={<VoiceAssistant />} /> {/* Новый маршрут */}
+                <Route path="/detailed-list/:type" element={<DetailedList />} /> 
+                <Route path="/voice-assistant" element={<VoiceAssistant />} /> 
             </Routes>
         </Router>
     );

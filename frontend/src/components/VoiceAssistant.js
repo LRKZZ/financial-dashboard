@@ -1,27 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/VoiceAssistant.css';
-import Mic01Icon from './Mic01Icon'; 
-
-const companyList = {
-    'лукойл': 1,
-    'роснефть': 2,
-    'втб': 3,
-    'газпром': 4,
-    'мтс': 5,
-    'сбербанк': 6,
-    'новатэк': 7,
-    'интер рао': 8,
-    'сургутнефтегаз': 9,
-    'афк система': 10
-};
+import Mic01Icon from './Mic01Icon';
 
 const VoiceAssistant = () => {
     const [isListening, setIsListening] = useState(false);
     const [transcript, setTranscript] = useState('');
     const [pendingCompany, setPendingCompany] = useState(null);
     const [chatHistory, setChatHistory] = useState([]);
+    const [companyList, setCompanyList] = useState({});
     const navigate = useNavigate();
+
+    useEffect(() => {
+        fetch('/api/company_list')
+            .then(response => response.json())
+            .then(data => setCompanyList(data))
+            .catch(error => console.error('Error fetching company list:', error));
+    }, []); 
 
     useEffect(() => {
         if (!('webkitSpeechRecognition' in window)) {
@@ -72,7 +67,7 @@ const VoiceAssistant = () => {
         return () => {
             recognition.stop();
         };
-    }, [isListening, pendingCompany, navigate]);
+    }, [isListening, pendingCompany, navigate, companyList]);
 
     const toggleListening = () => {
         setIsListening(!isListening);
@@ -91,7 +86,7 @@ const VoiceAssistant = () => {
                 onClick={toggleListening} 
                 className={`mic-button ${isListening ? 'listening' : ''}`}
             >
-                <Mic01Icon /> {}
+                <Mic01Icon />
             </button>
         </div>
     );

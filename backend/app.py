@@ -10,6 +10,7 @@ from queries.get_candles import get_candle
 from queries.get_currency_rates import get_currency_rates
 from queries.get_top_decline import get_top_decline
 from queries.get_top_growth import get_top_growth
+from queries.get_company_list import get_company_list
 
 redis_client = redis.StrictRedis(host="localhost", port=6379, decode_responses=True)
 
@@ -63,6 +64,9 @@ def get_top_declines():
 def get_top_growths():
     return get_top_growth()
     
+@app.route('/api/company_list', methods=['GET'])
+def company_list():
+    return get_company_list()
     
 if __name__ == "__main__":
     app.run(debug=True)
