@@ -64,9 +64,11 @@ def get_top_declines():
 def get_top_growths():
     return get_top_growth()
     
+
 @app.route('/api/company_list', methods=['GET'])
 def company_list():
     return get_company_list()
-    
+
+
 if __name__ == "__main__":
     app.run(debug=True)
