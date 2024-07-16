@@ -19,7 +19,7 @@ def aggregate_candles_query(time_frame):
     FROM
         {tables_by_time[time_frame]}
     WHERE
-        figi_id = %s
+        figi_id = :figi_id
     ORDER BY
         bucket
     """
