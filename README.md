@@ -79,6 +79,7 @@ sudo service postgresql start
 ```
 
 3. Создание базы данных и нужных таблиц
+   
 Войдите в `psql`
 ```bash
 sudo -u postgres psql
