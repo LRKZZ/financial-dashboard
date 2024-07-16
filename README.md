@@ -25,7 +25,7 @@ $ git config --global user.email johndoe@example.com
 ```
 
 ### Установка Redis
-1. Откройте терминал WSL (Ubuntu) и выполните команды
+1. Откройте терминал WSL (Ubuntu) и выполните команды:
 ```bash
 sudo apt update
 sudo apt install redis-server -y
@@ -64,3 +64,50 @@ redis-cli
 127.0.0.1:6379> ping
 PONG
 ```
+
+### Установка PostgreSQL
+1. Обновите список пакетов и установите PostgreSQL
+```bash
+sudo apt update
+sudo apt install postgresql postgresql-contrib -y
+```
+
+2. Запуск PostgreSQL
+```bash
+sudo service postgresql start
+```
+
+3. Создание базы данных и нужных таблиц
+Войдите в `psql`
+```bash
+sudo -u postgres psql
+```
+
+Создайте базу данных
+```sql
+CREATE DATABASE financial_db;
+```
+
+Создайте табилцу с наименованием `figi_numbers`
+```sql
+CREATE TABLE figi_numbers (
+    figi_id SERIAL PRIMARY KEY,
+    figi_number VARCHAR(50) NOT NULL,
+    company_name VARCHAR(50)
+);
+```
+
+Создайте четыре таблицы с названиями `candles`, `candles_5_min`, `candles_10_min`, `candles_60_min`
+```sql
+CREATE TABLE candles (
+    candles_id SERIAL PRIMARY KEY,
+    time_of_candle TIMESTAMP WITH TIME ZONE NOT NULL,
+    open_price NUMERIC(10, 5),
+    low_price NUMERIC(10, 5),
+    high_price NUMERIC(10, 5),
+    close_price NUMERIC(10, 5),
+    volume INTEGER,
+    figi_id SMALLINT REFERENCES figi_numbers(figi_id)
+);
+```
+
