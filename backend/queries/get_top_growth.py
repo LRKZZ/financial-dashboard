@@ -19,7 +19,7 @@ def get_top_growth():
     cur.execute('''
     WITH first_last_prices AS (
         SELECT
-            figi_id,
+            DISTINCT ON (figi_id) figi_id,
             FIRST_VALUE(close_price) OVER (PARTITION BY figi_id ORDER BY time_of_candle ASC) AS first_close_price,
             LAST_VALUE(close_price) OVER (PARTITION BY figi_id ORDER BY time_of_candle ASC RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS last_close_price
         FROM
