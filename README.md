@@ -115,7 +115,7 @@ CREATE TABLE candles (
 
 4. Вставка значений в таблицу `figi_numbers`
    
-Выполните следующий sql запрос
+Выполните следующий sql-запрос
 ```sql
 INSERT INTO figi_numbers (figi_id, figi_number, company_name) VALUES
 (1, 'BBG004731032', 'Лукойл'),
@@ -129,4 +129,27 @@ INSERT INTO figi_numbers (figi_id, figi_number, company_name) VALUES
 (9, 'BBG0047315D0', 'Сургутнефтегаз'),
 (10, 'BBG004S68614', 'АФК Система');
 ```
+5. Выйдите из psql
 
+```sql
+\q
+```
+   
+## Клонирование репозитория и настройка VS-code
+
+1. Клонируйте репозиторий
+```bash
+git clone git@github.com:LRKZZ/financial-dashboard.git
+```
+
+2. Запустите VS-code на **Windows** и скачайте расширение WSL
+3. Свяжите WSL и VS-code
+
+## Установка зависимостей
+Откройте консоль VS-code и введите следующие команды
+
+```bash
+sudo apt install python3
+python3 -m venv venv
+source venv/bin/activate
+```
