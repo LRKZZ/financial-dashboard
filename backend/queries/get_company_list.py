@@ -1,6 +1,6 @@
 from flask import jsonify
 from connection.get_db_connection import get_db_connection
-from queries.company_colors import company_colors
+from utils.company_colors import company_colors
 
 def get_company_list():
     conn = get_db_connection()
