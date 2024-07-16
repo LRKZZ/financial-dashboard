@@ -24,8 +24,8 @@ $ git config --global user.name "John Doe"
 $ git config --global user.email johndoe@example.com
 ```
 
-### Установка Redis и PostgreSQL
-1. Откройте терминал WSL (Ubuntu) и выполните команды:
+### Установка Redis
+1. Откройте терминал WSL (Ubuntu) и выполните команды
 ```bash
 sudo apt update
 sudo apt install redis-server -y
@@ -43,3 +43,24 @@ supervised systemd
 ```
 Сохраните изменения и закройте редактор (`Ctrl + O`, `Enter`, `Ctrl + X`).
 
+3. Запуск и проверка Redis
+Запустите Redis:
+```bash
+sudo service redis-server start
+```
+
+Проверьте статус Redis:
+```bash
+sudo service redis-server status
+```
+
+Проверьте работу Redis, подключившись к нему:
+```bash
+redis-cli
+```
+
+Внутри Redis CLI выполните команду `ping` и убедитесь, что возвращается `PONG`:
+```bash
+127.0.0.1:6379> ping
+PONG
+```
